@@ -65,7 +65,7 @@ path = os.path.abspath(os.curdir)
 print(path)
 
 # %% ../nbs/00_core.ipynb 6
-protein_dict = load_fasta('../test_data/test_sequence.fa')
+protein_dict = load_fasta('test_data/test_sequence.fa')
 
 
 # %% ../nbs/00_core.ipynb 7

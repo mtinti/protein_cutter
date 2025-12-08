@@ -5,4 +5,6 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://mtinti.github.io',
                 'git_url': 'https://github.com/mtinti/protein_cutter',
                 'lib_path': 'protein_cutter'},
-  'syms': {'protein_cutter.core': {'protein_cutter.core.foo': ('core.html#foo', 'protein_cutter/core.py')}}}
+  'syms': { 'protein_cutter.core': { 'protein_cutter.core.digest': ('core.html#digest', 'protein_cutter/core.py'),
+                                     'protein_cutter.core.foo': ('core.html#foo', 'protein_cutter/core.py'),
+                                     'protein_cutter.core.load_fasta': ('core.html#load_fasta', 'protein_cutter/core.py')}}}

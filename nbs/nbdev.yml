@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "protein_cutter"
+  site-url: "https://mtinti.github.io/protein_cutter"
+  description: "Python utility for in silico protein digestion and peptide uniqueness analysis across multiple sequences"
+  repo-branch: main
+  repo-url: "https://github.com/mtinti/protein_cutter"

@@ -14,6 +14,29 @@ from Bio import SeqIO
 import pandas as pd
 
 # %% ../nbs/00_core.ipynb 4
+from pathlib import Path
+import os
+
+# Get the repository root
+if 'GITHUB_WORKSPACE' in os.environ:
+  # In GitHub Actions
+  REPO_ROOT = Path(os.environ['GITHUB_WORKSPACE'])
+else:
+  # Local development - find repo root
+  REPO_ROOT = Path.cwd()
+  while not (REPO_ROOT / 'settings.ini').exists():
+      if REPO_ROOT == REPO_ROOT.parent:
+          REPO_ROOT = Path.cwd()  # Fallback
+          break
+      REPO_ROOT = REPO_ROOT.parent
+
+TEST_DATA = REPO_ROOT / 'test_data'
+
+print(f"Repo root: {REPO_ROOT}")
+print(f"Test data dir: {TEST_DATA}")
+print(f"Test data exists: {TEST_DATA.exists()}")
+
+# %% ../nbs/00_core.ipynb 5
 def load_fasta(fasta_path: Union[str, Path]) -> Dict[str, str]:
       import os
       path = os.path.abspath(os.curdir)
@@ -64,36 +87,10 @@ def load_fasta(fasta_path: Union[str, Path]) -> Dict[str, str]:
 
       return protein_dict
 
-# %% ../nbs/00_core.ipynb 5
-from pathlib import Path
-import os
-
-# Get the repository root
-if 'GITHUB_WORKSPACE' in os.environ:
-  # In GitHub Actions
-  REPO_ROOT = Path(os.environ['GITHUB_WORKSPACE'])
-else:
-  # Local development - find repo root
-  REPO_ROOT = Path.cwd()
-  while not (REPO_ROOT / 'settings.ini').exists():
-      if REPO_ROOT == REPO_ROOT.parent:
-          REPO_ROOT = Path.cwd()  # Fallback
-          break
-      REPO_ROOT = REPO_ROOT.parent
-
-TEST_DATA = REPO_ROOT / 'test_data'
-
-print(f"Repo root: {REPO_ROOT}")
-print(f"Test data dir: {TEST_DATA}")
-print(f"Test data exists: {TEST_DATA.exists()}")
-
-# %% ../nbs/00_core.ipynb 6
+# %% ../nbs/00_core.ipynb 7
 protein_dict = load_fasta(TEST_DATA / 'test_sequence.fa')
 
-# %% ../nbs/00_core.ipynb 7
-assert(protein_dict['P15497'][0:5]=='MKAVV')
-
-# %% ../nbs/00_core.ipynb 8
+# %% ../nbs/00_core.ipynb 9
 def digest(
     sequence: str,
     protein_id: str,
@@ -171,8 +168,8 @@ def digest(
        'mz_2', 'mz_3']]
       return df
 
-# %% ../nbs/00_core.ipynb 15
+# %% ../nbs/00_core.ipynb 17
 #| export
 
-# %% ../nbs/00_core.ipynb 16
+# %% ../nbs/00_core.ipynb 18
 def foo(): pass

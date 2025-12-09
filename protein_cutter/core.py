@@ -112,8 +112,10 @@ def digest(
     Returns
     -------
     pd.DataFrame
-        DataFrame with columns: protein_id, start_index, end_index, 
-        pep_seq, pep_length, prev_aa, next_aa, extended_seq
+        DataFrame with columns:
+        'start_index', 'end_index', 'pep_seq', 'protein_id', 'pep_length',
+        'prev_aa', 'next_aa', 'extended_seq', 'rep_extended_seq', 
+        'mass_mono', 'mass_avg', 'mz_1', 'mz_2', 'mz_3'
     """
     # Digest the protein
     cleavage_results = parser.xcleave(

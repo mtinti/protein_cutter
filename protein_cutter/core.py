@@ -84,10 +84,10 @@ def load_fasta(fasta_path: Union[str, Path]) -> Dict[str, str]:
     
     return protein_dict
 
-# %% ../nbs/00_core.ipynb 7
+# %% ../nbs/00_core.ipynb 6
 protein_dict = load_fasta(TEST_DATA / 'test_sequence.fa')
 
-# %% ../nbs/00_core.ipynb 11
+# %% ../nbs/00_core.ipynb 8
 def digest(
     sequence: str,
     protein_id: str,
@@ -180,7 +180,7 @@ def digest(
         df=df.sort_values('mass_mono')
     return df
 
-# %% ../nbs/00_core.ipynb 22
+# %% ../nbs/00_core.ipynb 19
 def digest_to_set(
     sequence: str,
     enzyme: str = 'trypsin',

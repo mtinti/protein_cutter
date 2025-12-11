@@ -95,9 +95,10 @@ def digest(
     enzyme: str = 'trypsin',
     missed_cleavages: int = 1,
     charge_states: list = [1, 2, 3],
-    mass_range: tuple=(800.0, 4000.0),
-    min_pep_length: int=5,
-    sort_by_mass: bool=False,
+    mass_range: tuple = (800.0, 4000.0),
+    min_pep_length: int = 5,
+    max_pep_length: int = 35,
+    sort_by_mass: bool = False,
 ) -> pd.DataFrame:
     """
     Digest a protein and add flanking amino acids for each peptide.
@@ -112,14 +113,33 @@ def digest(
         Enzyme name (default: 'trypsin')
     missed_cleavages : int
         Number of allowed missed cleavages (default: 1)
+    charge_states : list
+        Charge states for m/z calculation (default: [1, 2, 3])
+    mass_range : tuple
+        (min, max) monoisotopic mass filter in Da (default: (800.0, 4000.0))
+    min_pep_length : int
+        Minimum peptide length to retain (default: 5)
+    max_pep_length : int
+        Maximum peptide length to retain (default: 35)
+    sort_by_mass : bool
+        Sort output by monoisotopic mass (default: False)
     
     Returns
     -------
     pd.DataFrame
-        DataFrame with columns:
-        'start_index', 'end_index', 'pep_seq', 'protein_id', 'pep_length',
-        'prev_aa', 'next_aa', 'extended_seq', 'rep_extended_seq', 
-        'mass_mono', 'mass_avg', 'mz_1', 'mz_2', 'mz_3'
+        DataFrame with the following columns:
+        - start_index : int - Start position in protein sequence
+        - end_index : int - End position in protein sequence
+        - pep_seq : str - Peptide sequence
+        - protein_id : str - Protein identifier
+        - pep_length : int - Peptide length
+        - prev_aa : str - Previous amino acid (or '-' at N-terminus)
+        - next_aa : str - Next amino acid (or '-' at C-terminus)
+        - extended_seq : str - Sequence with flanking AAs
+        - rep_extended_seq : str - Extended sequence with parentheses
+        - mass_mono : float - Monoisotopic mass (Da)
+        - mass_avg : float - Average mass (Da)
+        - mz_{z} : float - m/z for each charge state in charge_states
     """
     # Digest the protein
     cleavage_results = parser.xcleave(
@@ -168,17 +188,25 @@ def digest(
             lambda seq: mass.calculate_mass(seq, charge=z)
         )
     
-    df = df[[
+    # Build column list dynamically based on charge_states
+    cols = [
         'start_index', 'end_index', 'pep_seq', 'protein_id', 'pep_length',
-        'prev_aa', 'next_aa', 'extended_seq', 'rep_extended_seq', 
-        'mass_mono', 'mass_avg', 'mz_1', 'mz_2', 'mz_3'
-    ]]
-
-    df = df[df['pep_seq'].str.len()>=min_pep_length]
-    df = df[df['mass_mono']>=mass_range[0]]
-    df = df[df['mass_mono']<=mass_range[1]]
+        'prev_aa', 'next_aa', 'extended_seq', 'rep_extended_seq',
+        'mass_mono', 'mass_avg'
+    ]
+    cols += [f'mz_{z}' for z in charge_states]
+    df = df[cols]
+    
+    # Apply filters
+    df = df[
+        (df['pep_seq'].str.len() >= min_pep_length) &
+        (df['pep_seq'].str.len() <= max_pep_length) &
+        (df['mass_mono'].between(mass_range[0], mass_range[1]))
+    ]
+    
     if sort_by_mass:
-        df=df.sort_values('mass_mono')
+        df = df.sort_values('mass_mono')
+    
     return df
 
 # %% ../nbs/00_core.ipynb 19
@@ -188,6 +216,7 @@ def digest_to_set(
     missed_cleavages: int = 0,
     mass_range: tuple[float, float] = (800.0, 4000.0),
     min_pep_length: int = 5,
+    max_pep_length: int = 35,
 ) -> set[str]:
     """
     Lightweight digest that returns only peptide sequences as a set.
@@ -207,7 +236,9 @@ def digest_to_set(
         (min, max) monoisotopic mass filter in Da (default: (800.0, 4000.0))
     min_pep_length : int
         Minimum peptide length to retain (default: 5)
-    
+    max_pep_length : int
+        Maximum peptide length to retain (default: 35)  
+        
     Returns
     -------
     set[str]
@@ -233,6 +264,7 @@ def digest_to_set(
         pep_seq
         for _, pep_seq in cleavage_results
         if len(pep_seq) >= min_pep_length
+        and len(pep_seq) <= max_pep_length
         and mass_range[0] <= mass.fast_mass(pep_seq) <= mass_range[1]
     }
 
@@ -245,6 +277,7 @@ def fasta_to_peptide_set(
     missed_cleavages: int = 0,
     mass_range: tuple[float, float] = (800.0, 4000.0),
     min_pep_length: int = 5,
+    max_pep_length: int = 35,
     show_progress: bool = True,
 ) -> set[str]:
     """
@@ -266,6 +299,8 @@ def fasta_to_peptide_set(
         (min, max) monoisotopic mass filter in Da (default: (800.0, 4000.0))
     min_pep_length : int
         Minimum peptide length to retain (default: 5)
+    max_pep_length : int
+        Maximum peptide length to retain (default: 35)        
     show_progress : bool
         Show progress bar with tqdm (default: True)
     
@@ -299,6 +334,7 @@ def fasta_to_peptide_set(
                     missed_cleavages=missed_cleavages,
                     mass_range=mass_range,
                     min_pep_length=min_pep_length,
+                    max_pep_length=max_pep_length
                 )
             )
     

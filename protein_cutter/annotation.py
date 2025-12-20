@@ -12,8 +12,11 @@ from pyteomics import mass
 from pathlib import Path
 from Bio import SeqIO
 import pandas as pd
-from .core import annotate_peptides_inplace
-from .core import fasta_to_peptide_set
+from .core import digest_to_empai_set
+from .core import collapse_empai_entries
+from .core import flag_proprietary_peptides_from_set
+from .core import flag_proprietary_from_pg
+from .core import load_peptides_from_fasta
 
 # %% ../nbs/01_annotation.ipynb 4
 from pathlib import Path
@@ -37,28 +40,3 @@ CONFIG_FILES = REPO_ROOT / 'config_files'
 print(f"Repo root: {REPO_ROOT}")
 print(f"Test data dir: {TEST_DATA}")
 print(f"Test data exists: {TEST_DATA.exists()}")
-
-# %% ../nbs/01_annotation.ipynb 6
-import shutil
-
-#def annotation_pipline():
-#    canonical_set = fasta_to_peptide_set(TEST_DATA / config['canonical_fasta'],
-#                                         mass_range = (0.0, 4000000.0),
-#                                         min_pep_length =config['min_pep_length']
-#                                        )
-#    print(canonical_set) 
-#    canonical_set.update(set(['DASGPAMTEIGEQPWGR','DVAGAVEFWTDR']))
-                         
-#    annotate_peptides_inplace(TEST_DATA / config['input_file'], canonical_set)
-
-#    spc_out = pd.read_csv(TEST_DATA / config['input_file'],sep='\t')
-#    print(spc_out.iloc[:4,-3:].head())
-    
-
-#    src = TEST_DATA / "test_spectronaut_pep_out.tsv.bk"
-#    dst = TEST_DATA / "test_spectronaut_pep_out.tsv"
-    
-#    shutil.copy(src, dst)
-#    print(f"Restored {dst.name} from backup")    
-
-#annotation_pipline()    

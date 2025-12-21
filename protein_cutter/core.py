@@ -42,40 +42,23 @@ print(f"Repo root: {REPO_ROOT}")
 print(f"Test data dir: {TEST_DATA}")
 print(f"Test data exists: {TEST_DATA.exists()}")
 
-# %% ../nbs/00_core.ipynb 5
+# %% ../nbs/00_core.ipynb 6
 def load_fasta(fasta_path: Union[str, Path]) -> Dict[str, str]:
     """
     Load protein sequences from a FASTA file into a dictionary.
     
     Parses a FASTA file and returns a dictionary mapping protein
     identifiers to their sequences.
-    
+
     Parameters
-    ----------
+    ----------    
     fasta_path : str or Path
         Path to the FASTA file.
-    
+        
     Returns
     -------
     Dict[str, str]
         Dictionary with protein IDs as keys and sequences as values.
-    
-    Raises
-    ------
-    FileNotFoundError
-        If the FASTA file does not exist.
-    ValueError
-        If no sequences are found in the file.
-    
-    Examples
-    --------
-    ```python
-        proteins = load_fasta("uniprot_human.fasta")
-        print(f"Loaded {len(proteins)} proteins")
-        
-        # Access a specific protein
-        sequence = proteins["P12345"]
-    ```
     """
 
     path = os.path.abspath(os.curdir)
@@ -189,7 +172,7 @@ def xcleave(
     
     return peptides
 
-# %% ../nbs/00_core.ipynb 16
+# %% ../nbs/00_core.ipynb 15
 def digest(
     sequence: str,
     protein_id: str,
@@ -254,11 +237,6 @@ def digest(
         - rep_extended_seq: Extended sequence with parentheses notation
         - mass_mono: Monoisotopic mass in Daltons
         - mz_N: Mass-to-charge ratio for each charge state N
-    
-    Raises
-    ------
-    ValueError
-        If fixed_mods contains unknown amino acid residues.
     
     Notes
     -----
@@ -356,7 +334,7 @@ def digest(
     return df
 
 
-# %% ../nbs/00_core.ipynb 19
+# %% ../nbs/00_core.ipynb 18
 def digest_to_empai_set(
     sequence: str,
     enzyme: str = "trypsin_full",
@@ -474,7 +452,7 @@ def digest_to_empai_set(
 
     return out
 
-# %% ../nbs/00_core.ipynb 20
+# %% ../nbs/00_core.ipynb 19
 def collapse_empai_entries(empai_entries: set[str]) -> set[str]:
     """
     Collapse Spectronaut-like _PEPTIDE_.z entries to stripped peptide sequences:
@@ -496,7 +474,7 @@ def collapse_empai_entries(empai_entries: set[str]) -> set[str]:
 
     return stripped
 
-# %% ../nbs/00_core.ipynb 29
+# %% ../nbs/00_core.ipynb 28
 def fasta_to_peptide_set(
     fasta_path: Union[str, Path],
     enzyme: str = 'trypsin_full',
@@ -535,10 +513,6 @@ def fasta_to_peptide_set(
     set of str
         Set of unique peptide sequences from all digested proteins.
     
-    Raises
-    ------
-    FileNotFoundError
-        If the FASTA file does not exist.
     
     Notes
     -----
@@ -594,7 +568,7 @@ def fasta_to_peptide_set(
     
     return peptide_set
 
-# %% ../nbs/00_core.ipynb 34
+# %% ../nbs/00_core.ipynb 33
 def flag_proprietary_peptides_from_set(
     input_path: Union[str, Path],
     output_path: Union[str, Path],
@@ -640,14 +614,6 @@ def flag_proprietary_peptides_from_set(
     -------
     int
         Number of peptides processed.
-    
-    Raises
-    ------
-    FileNotFoundError
-        If the input file does not exist.
-    ValueError
-        If sequence_col is not found in the file or new_col_name
-        already exists.
     
     Notes
     -----
@@ -707,7 +673,7 @@ def flag_proprietary_peptides_from_set(
     
     return peptide_count
 
-# %% ../nbs/00_core.ipynb 37
+# %% ../nbs/00_core.ipynb 36
 def flag_proprietary_from_pg(
     input_path: Union[str, Path],
     output_path: Union[str, Path],
@@ -764,13 +730,6 @@ def flag_proprietary_from_pg(
         - has_uniprot: Entries with UniProt mappings
         - written: Number of lines written to output file
     
-    Raises
-    ------
-    FileNotFoundError
-        If the input file does not exist.
-    ValueError
-        If accession_col is not found in the file or new_col_name
-        already exists.
     
     Notes
     -----
@@ -866,7 +825,7 @@ def flag_proprietary_from_pg(
     
     return stats
 
-# %% ../nbs/00_core.ipynb 41
+# %% ../nbs/00_core.ipynb 40
 def load_peptides_from_fasta(
     fasta_path: Union[str, Path],
     show_progress: bool = True) -> set[str]:
@@ -892,11 +851,6 @@ def load_peptides_from_fasta(
     set of str
         A set containing unique peptide sequences extracted from the
         FASTA file.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the provided FASTA file does not exist.
 
     Notes
     -----

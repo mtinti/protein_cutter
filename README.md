@@ -6,6 +6,20 @@
 This file will become your README and also the index of your
 documentation.
 
+### Install protein_cutter
+
+``` sh
+#create a conda env
+conda create -n protein_cutter python=3.9
+
+#clone the repo
+git clone git@github.com:mtinti/protein_cutter.git
+
+#install the repo
+cd protein_cutter
+pip install -e .
+```
+
 ## Developer Guide
 
 If you are new to using `nbdev` here are some useful pointers to get you
@@ -27,25 +41,6 @@ $ nbdev_prepare
 ## Usage
 
 ### Installation
-
-Install latest from the GitHub
-[repository](https://github.com/mtinti/protein_cutter):
-
-``` sh
-$ pip install git+https://github.com/mtinti/protein_cutter.git
-```
-
-or from [conda](https://anaconda.org/mtinti/protein_cutter)
-
-``` sh
-$ conda install -c mtinti protein_cutter
-```
-
-or from [pypi](https://pypi.org/project/protein_cutter/)
-
-``` sh
-$ pip install protein_cutter
-```
 
 ### Documentation
 

@@ -182,6 +182,7 @@ def xcleave(
 
     if nme:
         if peptides[0][1][0]=='M':
+            #add the first peptide without the M
             peptides.append((1,peptides[0][1][1:]))
         
     peptides.sort(key=lambda x: (x[0], len(x[1])))
@@ -713,7 +714,7 @@ def flag_proprietary_from_pg(
     accession_col: str = 'PG.ProteinAccessions',
     new_col_name: str = 'is_novel',
     uniprot_prefixes: tuple[str, ...] = ('>fl', '>sp'),
-    keep_only_novel: bool = False, 
+    keep_only_novel: bool = True, 
     sep: str = None,
     show_progress: bool = True ) -> dict[str, int]:
 
@@ -865,7 +866,7 @@ def flag_proprietary_from_pg(
     
     return stats
 
-# %% ../nbs/00_core.ipynb 40
+# %% ../nbs/00_core.ipynb 41
 def load_peptides_from_fasta(
     fasta_path: Union[str, Path],
     show_progress: bool = True) -> set[str]:

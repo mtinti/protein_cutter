@@ -120,12 +120,17 @@ def get_cleavage_sites(sequence: str, protease: str) -> list[int]:
     pattern = re.compile(protease_dict[protease])
     return [m.start(0) for m in pattern.finditer(sequence)]
 
-
+#Re-implementation of parser.xcleave from pyteomics
+# to have full control on regular expression
+# and to implement excision of n-term M
 def xcleave(
     sequence: str,
     protease: str,
     missed_cleavages: int = 0,
-) -> list[tuple[int, str]]:
+    #N-terminal methionine excision (NME)
+    nme: bool = True
+    ) -> list[tuple[int, str]]:
+    
     """
     Cleave a protein sequence and return peptides with their start positions.
     
@@ -174,7 +179,11 @@ def xcleave(
             end_pos = cut_points[i + mc + 1]
             peptide = sequence[start_pos:end_pos]
             peptides.append((start_pos, peptide))
-    
+
+    if nme:
+        if peptides[0][1][0]=='M':
+            peptides.append((1,peptides[0][1][1:]))
+        
     peptides.sort(key=lambda x: (x[0], len(x[1])))
     
     return peptides
@@ -183,7 +192,7 @@ def xcleave(
 def digest(
     sequence: str,
     protein_id: str,
-    enzyme: str = "trypsin",
+    enzyme: str = "trypsin_full",
     missed_cleavages: int = 1,
     charge_states: list[int] | None = None,
     mass_range: tuple[float, float] = (800.0, 4000.0),
@@ -489,9 +498,9 @@ def collapse_empai_entries(empai_entries: set[str]) -> set[str]:
 # %% ../nbs/00_core.ipynb 29
 def fasta_to_peptide_set(
     fasta_path: Union[str, Path],
-    enzyme: str = 'trypsin',
+    enzyme: str = 'trypsin_full',
     missed_cleavages: int = 0,
-    min_pep_length: int = 5,
+    min_pep_length: int = 6,
     max_pep_length: int = 52,
     show_progress: bool = True) -> set[str]:
 

@@ -21,4 +21,6 @@ d = { 'settings': { 'branch': 'main',
                                      'protein_cutter.core.load_fasta': ('core.html#load_fasta', 'protein_cutter/core.py'),
                                      'protein_cutter.core.load_peptides_from_fasta': ( 'core.html#load_peptides_from_fasta',
                                                                                        'protein_cutter/core.py'),
-                                     'protein_cutter.core.xcleave': ('core.html#xcleave', 'protein_cutter/core.py')}}}
+                                     'protein_cutter.core.xcleave': ('core.html#xcleave', 'protein_cutter/core.py')},
+            'protein_cutter.pai': { 'protein_cutter.pai.add_pai': ('pai.html#add_pai', 'protein_cutter/pai.py'),
+                                    'protein_cutter.pai.get_observable': ('pai.html#get_observable', 'protein_cutter/pai.py')}}}

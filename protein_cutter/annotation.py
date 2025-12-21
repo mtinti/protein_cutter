@@ -17,6 +17,7 @@ from .core import collapse_empai_entries
 from .core import flag_proprietary_peptides_from_set
 from .core import flag_proprietary_from_pg
 from .core import load_peptides_from_fasta
+from .core import load_fasta
 
 # %% ../nbs/01_annotation.ipynb 4
 from pathlib import Path

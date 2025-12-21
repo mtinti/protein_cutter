@@ -12,13 +12,15 @@ from typing import Union
 from Bio import SeqIO
 from tqdm import tqdm
 import pandas as pd
+import numpy as np
 import re
 import os
 
+
 # %% auto 0
-__all__ = ['TEST_DATA', 'protein_dict', 'load_fasta', 'digest', 'digest_to_empai_set', 'collapse_empai_entries',
-           'fasta_to_peptide_set', 'flag_proprietary_peptides_from_set', 'flag_proprietary_from_pg',
-           'load_peptides_from_fasta']
+__all__ = ['TEST_DATA', 'protein_dict', 'protease_dict', 'load_fasta', 'get_cleavage_sites', 'xcleave', 'digest',
+           'digest_to_empai_set', 'collapse_empai_entries', 'fasta_to_peptide_set',
+           'flag_proprietary_peptides_from_set', 'flag_proprietary_from_pg', 'load_peptides_from_fasta']
 
 # %% ../nbs/00_core.ipynb 4
 # Get the repository root
@@ -96,7 +98,88 @@ def load_fasta(fasta_path: Union[str, Path]) -> Dict[str, str]:
 # %% ../nbs/00_core.ipynb 7
 protein_dict = load_fasta(TEST_DATA / 'test_sequence.fa')
 
-# %% ../nbs/00_core.ipynb 11
+# %% ../nbs/00_core.ipynb 10
+import re
+
+protease_dict = dict()
+protease_dict['trypsin_full'] = '[KR]'
+protease_dict["trypsin"] = "([KR](?=[^P]))"
+
+
+
+# %% ../nbs/00_core.ipynb 12
+import re
+
+def get_cleavage_sites(sequence: str, protease: str) -> list[int]:
+    """
+    Get the position of proteolytic cleavage sites in a sequence.
+    """
+    if protease not in protease_dict:
+        raise ValueError(f"Unknown protease: {protease}. Available: {list(protease_dict.keys())}")
+    
+    pattern = re.compile(protease_dict[protease])
+    return [m.start(0) for m in pattern.finditer(sequence)]
+
+
+def xcleave(
+    sequence: str,
+    protease: str,
+    missed_cleavages: int = 0,
+) -> list[tuple[int, str]]:
+    """
+    Cleave a protein sequence and return peptides with their start positions.
+    
+    Works with any protease defined in protease_dict using regular expressions.
+    Handles both C-terminal cleavage (e.g., trypsin) and N-terminal cleavage
+    (e.g., Lys-N, Asp-N) enzymes.
+    
+    Parameters
+    ----------
+    sequence : str
+        Protein amino acid sequence to digest.
+    protease : str
+        Protease name from protease_dict.
+    missed_cleavages : int
+        Number of allowed missed cleavage sites. Default is 0.
+    
+    Returns
+    -------
+    list of tuple (int, str)
+        List of tuples containing start index and peptide sequence.
+    """
+    sites = get_cleavage_sites(sequence, protease)
+    
+    if not sites:
+        return [(0, sequence)]
+    
+    # Determine if N-terminal or C-terminal cleavage based on regex
+    # N-terminal enzymes use lookahead (?=X) - cut BEFORE the residue
+    # C-terminal enzymes match the residue - cut AFTER the residue
+    regex = protease_dict[protease]
+    is_n_terminal = regex.startswith('(?=')
+    
+    if is_n_terminal:
+        # Cut BEFORE the matched position
+        cut_points = [0] + sites + [len(sequence)]
+    else:
+        # Cut AFTER the matched position
+        cut_points = [0] + [s + 1 for s in sites] + [len(sequence)]
+    
+    peptides = []
+    n_cuts = len(cut_points)
+    
+    for mc in range(missed_cleavages + 1):
+        for i in range(n_cuts - mc - 1):
+            start_pos = cut_points[i]
+            end_pos = cut_points[i + mc + 1]
+            peptide = sequence[start_pos:end_pos]
+            peptides.append((start_pos, peptide))
+    
+    peptides.sort(key=lambda x: (x[0], len(x[1])))
+    
+    return peptides
+
+# %% ../nbs/00_core.ipynb 16
 def digest(
     sequence: str,
     protein_id: str,
@@ -202,11 +285,13 @@ def digest(
     custom_aa_mass.update(fixed_mods)
 
     # Digest the protein: returns (start_index, pep_seq)
-    cleavage_results = parser.xcleave(
+    cleavage_results = xcleave(
         sequence,
         enzyme,
         missed_cleavages=missed_cleavages,
     )
+    #print(cleavage_results)
+    #cleavage_results = get_peptides_from_sites(sequence, "trypsin_full")
 
     df = pd.DataFrame(cleavage_results, columns=["start_index", "pep_seq"])
     df["protein_id"] = protein_id
@@ -261,10 +346,10 @@ def digest(
     return df
 
 
-# %% ../nbs/00_core.ipynb 22
+# %% ../nbs/00_core.ipynb 19
 def digest_to_empai_set(
     sequence: str,
-    enzyme: str = "trypsin",
+    enzyme: str = "trypsin_full",
     missed_cleavages: int = 0,
     mz_range: tuple[float, float] = (200.0, 4000.0),
     min_charge: int = 1,          #  ignore 1+ ?? yes for now
@@ -332,7 +417,7 @@ def digest_to_empai_set(
     custom_aa_mass.update(fixed_mods)
 
     # Digest
-    cleavage_results = parser.xcleave(
+    cleavage_results = xcleave(
         sequence,
         enzyme,
         missed_cleavages=missed_cleavages,
@@ -379,7 +464,7 @@ def digest_to_empai_set(
 
     return out
 
-# %% ../nbs/00_core.ipynb 23
+# %% ../nbs/00_core.ipynb 20
 def collapse_empai_entries(empai_entries: set[str]) -> set[str]:
     """
     Collapse Spectronaut-like _PEPTIDE_.z entries to stripped peptide sequences:
@@ -401,7 +486,7 @@ def collapse_empai_entries(empai_entries: set[str]) -> set[str]:
 
     return stripped
 
-# %% ../nbs/00_core.ipynb 32
+# %% ../nbs/00_core.ipynb 29
 def fasta_to_peptide_set(
     fasta_path: Union[str, Path],
     enzyme: str = 'trypsin',
@@ -483,7 +568,7 @@ def fasta_to_peptide_set(
         for record in records:
             
             sequence=str(record.seq)
-            cleavage_results = parser.xcleave(
+            cleavage_results = xcleave(
                 sequence,
                 enzyme,
                 missed_cleavages=missed_cleavages
@@ -499,7 +584,7 @@ def fasta_to_peptide_set(
     
     return peptide_set
 
-# %% ../nbs/00_core.ipynb 37
+# %% ../nbs/00_core.ipynb 34
 def flag_proprietary_peptides_from_set(
     input_path: Union[str, Path],
     output_path: Union[str, Path],
@@ -612,7 +697,7 @@ def flag_proprietary_peptides_from_set(
     
     return peptide_count
 
-# %% ../nbs/00_core.ipynb 41
+# %% ../nbs/00_core.ipynb 37
 def flag_proprietary_from_pg(
     input_path: Union[str, Path],
     output_path: Union[str, Path],
@@ -771,7 +856,7 @@ def flag_proprietary_from_pg(
     
     return stats
 
-# %% ../nbs/00_core.ipynb 44
+# %% ../nbs/00_core.ipynb 40
 def load_peptides_from_fasta(
     fasta_path: Union[str, Path],
     show_progress: bool = True) -> set[str]:

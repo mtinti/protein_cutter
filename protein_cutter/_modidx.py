@@ -16,6 +16,8 @@ d = { 'settings': { 'branch': 'main',
                                                                                        'protein_cutter/core.py'),
                                      'protein_cutter.core.flag_proprietary_peptides_from_set': ( 'core.html#flag_proprietary_peptides_from_set',
                                                                                                  'protein_cutter/core.py'),
+                                     'protein_cutter.core.get_cleavage_sites': ('core.html#get_cleavage_sites', 'protein_cutter/core.py'),
                                      'protein_cutter.core.load_fasta': ('core.html#load_fasta', 'protein_cutter/core.py'),
                                      'protein_cutter.core.load_peptides_from_fasta': ( 'core.html#load_peptides_from_fasta',
-                                                                                       'protein_cutter/core.py')}}}
+                                                                                       'protein_cutter/core.py'),
+                                     'protein_cutter.core.xcleave': ('core.html#xcleave', 'protein_cutter/core.py')}}}
